@@ -1,0 +1,17 @@
+{
+    "name": "fnash/graphql-qb",
+    "type": "library",
+    "description": "A php GraphQL Query Builder. Nice API. Readable queries.",
+    "autoload": {
+        "psr-4": {
+            "Fnash\\GraphQL\\": "GraphQL/"
+        }
+    },
+    "license": "MIT",
+    "require": {
+        "webonyx/graphql-php": "^0.11.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.4"
+    }
+}

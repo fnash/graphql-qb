@@ -1,0 +1,249 @@
+<?php
+
+namespace Fnash\GraphQL;
+
+final class Query
+{
+    private static $operationNamePlaceholder = '_operationNamePlaceholder_';
+
+    public $operationName;
+
+    public $variables = [];
+
+    public $isRootQuery = true;
+
+    public $type = [];
+
+    public $args = [];
+
+    public $fields = [];
+
+    public $skipIf = [];
+
+    public $includeIf = [];
+
+    public $fragments = [];
+
+    public static function create($type = null, array $args = [], array $fields = []): Query
+    {
+        return new self($type, $args, $fields);
+    }
+
+    public function operationName(string $operationName): Query
+    {
+        $this->operationName = $operationName;
+
+        return $this;
+    }
+
+    private static function printQuery($operationName, $variables): string
+    {
+        if (null === $operationName) {
+            if (\count($variables)) {
+                $operationName = static::$operationNamePlaceholder;
+            } else {
+                return '';
+            }
+        }
+
+        return sprintf('query %s %s', $operationName, static::printVariables($variables));
+    }
+
+    public function variables(array $variables = []): Query
+    {
+        foreach ($variables as $variableName => $variableType) {
+            $this->variables[(string) $variableName] = (string) $variableType;
+        }
+
+        return $this;
+    }
+
+    private static function printVariables(array $value): string
+    {
+        if (!\count($value)) {
+            return '';
+        }
+
+        $variables = [];
+
+        foreach ($value as $variableName => $variableType) {
+            $variables[] = sprintf('%s: %s', $variableName, $variableType);
+        }
+
+        return sprintf('(%s)', implode(', ', $variables));
+    }
+
+    public function arguments(array $args = []): Query
+    {
+        foreach ($args as $name => $value) {
+            $this->args[$name] = $value;
+        }
+
+        ksort($this->args);
+
+        return $this;
+    }
+
+    private static function printArgs(array $value): string
+    {
+        if (!count($value)) {
+            return '';
+        }
+
+        $args = [];
+        foreach ($value as $argName => $argValue) {
+            if (\is_string($argValue) && '$' !== $argValue[0]) {
+                $argValue = sprintf('"%s"', $argValue);
+            }
+
+            if (\is_bool($argValue) || \is_float($argValue)) {
+                $argValue = var_export($argValue, true);
+            }
+
+            $args[] = sprintf('%s: %s', $argName, $argValue);
+        }
+
+        return sprintf('(%s)', implode(', ', $args));
+    }
+
+    public function fields(array $fields = []): Query
+    {
+        foreach ($fields as $fieldAlias => $field) {
+            if (\is_string($field)) {
+                if (\is_string($fieldAlias)) {
+                    $this->fields[$fieldAlias] = $field;
+                } else {
+                    $this->fields[$field] = $field;
+                }
+            }
+
+            if ($field instanceof self) {
+                $field->isRootQuery = false;
+                $this->fields[$fieldAlias] = $field;
+            }
+        }
+
+        ksort($this->fields);
+
+        return $this;
+    }
+
+    private static function printFields(array $value, array $skipIf = [], array $includeIf = []): string
+    {
+        $fields = [];
+
+        foreach ($value as $fieldAlias => $field) {
+            $directive = '';
+
+            if (\is_string($field)) {
+                if ($fieldAlias !== $field) {
+                    if (array_key_exists($fieldAlias, $skipIf)) {
+                        $directive = sprintf('@skip(if: %s)', $skipIf[$fieldAlias]);
+                    } elseif (array_key_exists($fieldAlias, $includeIf)) {
+                        $directive = sprintf('@include(if: %s)', $includeIf[$fieldAlias]);
+                    }
+
+                    $fields[] = sprintf('%s: %s %s', $fieldAlias, $field, $directive);
+                } else {
+                    if (array_key_exists($field, $skipIf)) {
+                        $directive = sprintf('@skip(if: %s)', $skipIf[$field]);
+                    } elseif (array_key_exists($field, $includeIf)) {
+                        $directive = sprintf('@include(if: %s)', $includeIf[$field]);
+                    }
+
+                    $fields[] = sprintf('%s %s', $field, $directive);
+                }
+            }
+
+            if ($field instanceof self) {
+                $field->isRootQuery = false;
+
+                if (array_key_exists($fieldAlias, $skipIf)) {
+                    $directive = sprintf('@skip(if: %s)', $skipIf[$fieldAlias]);
+                } elseif (array_key_exists($fieldAlias, $includeIf)) {
+                    $directive = sprintf('@include(if: %s)', $includeIf[$fieldAlias]);
+                }
+
+                if (null !== $field->type) {
+                    $fieldAlias = sprintf('%s: %s', $fieldAlias, $field->type);
+                }
+
+                $fields[] = sprintf('%s %s { %s }', $fieldAlias, $directive, static::printFields($field->fields));
+            }
+        }
+
+        return implode(', ', $fields);
+    }
+
+    public function skipIf(array $values = []): Query
+    {
+        foreach ($values as $field => $argument) {
+            $this->skipIf[$field] = $argument;
+        }
+
+        return $this;
+    }
+
+    public function includeIf(array $values = []): Query
+    {
+        foreach ($values as $field => $argument) {
+            $this->includeIf[$field] = $argument;
+        }
+
+        return $this;
+    }
+
+    public function __toString()
+    {
+        if ($this->isRootQuery) {
+            $query = sprintf('%s { %s %s { %s } } %s', static::printQuery($this->operationName, $this->variables), static::printType($this->type), static::printArgs($this->args), static::printFields($this->fields, $this->skipIf, $this->includeIf), static::printFragments($this->fragments));
+        } else {
+            $query = sprintf('%s { %s }', static::printType($this->type), static::printFields($this->fields, $this->skipIf, $this->includeIf));
+        }
+
+        $query = \GraphQL\Language\Printer::doPrint(\GraphQL\Language\Parser::parse((string) $query));
+
+        $query = str_replace(static::$operationNamePlaceholder, 'query_'.sha1($query), $query);
+
+        return $query;
+    }
+
+    public function addFragment(Fragment $fragment)
+    {
+        $this->fragments[] = $fragment;
+
+        return $this;
+    }
+
+    private function printFragments($value)
+    {
+        $fragments = '';
+        foreach ($value as $fragment) {
+            $fragments .= (string) $fragment;
+        }
+
+        return $fragments;
+    }
+
+    private function __construct($type = null, array $args = [], array $fields = [])
+    {
+        $this->type = $type;
+
+        $this->arguments($args);
+
+        $this->fields($fields);
+    }
+
+    private static function printType($value): string
+    {
+        if (\is_string($value)) {
+            return $value;
+        }
+
+        if (\is_array($value) && \count($value)) {
+            foreach ($value as $alias => $type) {
+                return sprintf('%s: %s', $alias, $type);
+            }
+        }
+    }
+}
