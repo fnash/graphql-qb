@@ -4,17 +4,38 @@ namespace Fnash\GraphQL;
 
 final class Fragment
 {
+    /**
+     * @var string
+     */
     public $name;
 
+    /**
+     * @var string
+     */
     public $type;
 
+    /**
+     * @var array
+     */
     public $fields = [];
 
+    /**
+     * @param string $name
+     * @param string $type
+     * @param array $fields
+     *
+     * @return Fragment
+     */
     public static function create(string $name, string $type, array $fields = []): Fragment
     {
         return new self($name, $type, $fields);
     }
 
+    /**
+     * @param array $fields
+     *
+     * @return Fragment
+     */
     public function fields(array $fields = []): Fragment
     {
         foreach ($fields as $fieldAlias => $field) {
@@ -45,6 +66,11 @@ final class Fragment
         return $query;
     }
 
+    /**
+     * @param array $value
+     *
+     * @return string
+     */
     private static function printFields(array $value): string
     {
         $fields = [];
@@ -72,6 +98,11 @@ final class Fragment
         return implode(', ', $fields);
     }
 
+    /**
+     * @param string $name
+     * @param string $type
+     * @param array $fields
+     */
     private function __construct(string $name, string $type, array $fields)
     {
         $this->name = $name;

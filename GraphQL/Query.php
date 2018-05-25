@@ -6,29 +6,68 @@ final class Query
 {
     private static $operationNamePlaceholder = '_operationNamePlaceholder_';
 
+    /**
+     * @var string
+     */
     public $operationName;
 
+    /**
+     * @var array
+     */
     public $variables = [];
 
+    /**
+     * @var bool
+     */
     public $isRootQuery = true;
 
+    /**
+     * @var array
+     */
     public $type = [];
 
+    /**
+     * @var array
+     */
     public $args = [];
 
+    /**
+     * @var array
+     */
     public $fields = [];
 
+    /**
+     * @var array
+     */
     public $skipIf = [];
 
+    /**
+     * @var array
+     */
     public $includeIf = [];
 
+    /**
+     * @var array
+     */
     public $fragments = [];
 
+    /**
+     * @param null $type
+     * @param array $args
+     * @param array $fields
+     *
+     * @return Query
+     */
     public static function create($type = null, array $args = [], array $fields = []): Query
     {
         return new self($type, $args, $fields);
     }
 
+    /**
+     * @param string $operationName
+     *
+     * @return Query
+     */
     public function operationName(string $operationName): Query
     {
         $this->operationName = $operationName;
@@ -36,6 +75,12 @@ final class Query
         return $this;
     }
 
+    /**
+     * @param $operationName
+     * @param $variables
+     *
+     * @return string
+     */
     private static function printQuery($operationName, $variables): string
     {
         if (null === $operationName) {
@@ -49,6 +94,11 @@ final class Query
         return sprintf('query %s %s', $operationName, static::printVariables($variables));
     }
 
+    /**
+     * @param array $variables
+     *
+     * @return Query
+     */
     public function variables(array $variables = []): Query
     {
         foreach ($variables as $variableName => $variableType) {
@@ -58,6 +108,11 @@ final class Query
         return $this;
     }
 
+    /**
+     * @param array $value
+     *
+     * @return string
+     */
     private static function printVariables(array $value): string
     {
         if (!\count($value)) {
@@ -73,6 +128,11 @@ final class Query
         return sprintf('(%s)', implode(', ', $variables));
     }
 
+    /**
+     * @param array $args
+     *
+     * @return Query
+     */
     public function arguments(array $args = []): Query
     {
         foreach ($args as $name => $value) {
@@ -84,6 +144,11 @@ final class Query
         return $this;
     }
 
+    /**
+     * @param array $value
+     *
+     * @return string
+     */
     private static function printArgs(array $value): string
     {
         if (!count($value)) {
@@ -106,6 +171,11 @@ final class Query
         return sprintf('(%s)', implode(', ', $args));
     }
 
+    /**
+     * @param array $fields
+     *
+     * @return Query
+     */
     public function fields(array $fields = []): Query
     {
         foreach ($fields as $fieldAlias => $field) {
@@ -128,6 +198,13 @@ final class Query
         return $this;
     }
 
+    /**
+     * @param array $value
+     * @param array $skipIf
+     * @param array $includeIf
+     *
+     * @return string
+     */
     private static function printFields(array $value, array $skipIf = [], array $includeIf = []): string
     {
         $fields = [];
@@ -175,6 +252,11 @@ final class Query
         return implode(', ', $fields);
     }
 
+    /**
+     * @param array $values
+     *
+     * @return Query
+     */
     public function skipIf(array $values = []): Query
     {
         foreach ($values as $field => $argument) {
@@ -184,6 +266,11 @@ final class Query
         return $this;
     }
 
+    /**
+     * @param array $values
+     *
+     * @return Query
+     */
     public function includeIf(array $values = []): Query
     {
         foreach ($values as $field => $argument) {
@@ -208,6 +295,11 @@ final class Query
         return $query;
     }
 
+    /**
+     * @param Fragment $fragment
+     *
+     * @return $this
+     */
     public function addFragment(Fragment $fragment)
     {
         $this->fragments[] = $fragment;
@@ -215,6 +307,11 @@ final class Query
         return $this;
     }
 
+    /**
+     * @param $value
+     *
+     * @return string
+     */
     private function printFragments($value)
     {
         $fragments = '';
@@ -225,6 +322,11 @@ final class Query
         return $fragments;
     }
 
+    /**
+     * @param null $type
+     * @param array $args
+     * @param array $fields
+     */
     private function __construct($type = null, array $args = [], array $fields = [])
     {
         $this->type = $type;
