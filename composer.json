@@ -8,6 +8,12 @@
         }
     },
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Fayez Naccache",
+            "email": "fayez.naccache@gmail.com"
+        }
+    ],
     "require": {
         "webonyx/graphql-php": "^0.11.4"
     },
