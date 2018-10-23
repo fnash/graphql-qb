@@ -5,14 +5,14 @@
 A php GraphQL Query Builder. Nice API. Readable queries. Examples in Unit Tests.
 
 Includes:
-- Sorted fields
-- Operation/query name
-- Add variables
+- Query / Mutation / Fragment
+- Sorted Fields
+- Custom Operation name
 - A predictable operation name is generated if you don't specify one and add variables
+- Add variables
 - Add arguments
 - Directives (Include / Skip)
 - Sub query
-- Fragment
 
 TODO:
 - Arguments in sub queries
@@ -32,20 +32,16 @@ $query = Query::create('article')
     ->fields([
         'id',
         'title',
-        'brand',
-        'myLangAlias' => 'lang',
+        'body',
+        'myLanguageAlias' => 'language',
         'tags' => Query::create()->fields([
             'id',
-            'brand',
-            'lang',
-            'label',
-            'vocabulary' => Query::create()->fields([
-                '_ObjectType_',
-                '_ObjectId_',
+            'tagLabel' => 'label',
+            'language',
+            'taxonomy' => Query::create()->fields([
                 'id',
-                'brand',
-                'myLangAlias' => 'lang',
                 'label',
+                'language'
             ]),
         ])
     ])
@@ -59,23 +55,19 @@ echo $query;
 
 
 ```graphql
-query query_812cacc644f4e19fd6fe1525ba99060388e37f47($withTags: Boolean = false) {
+query query_d084b5fa08a495bb76e87b51cb5e2b33fc87039a($withTags: Boolean = false) {
   article {
-    brand
+    body
     id
-    myLangAlias: lang
+    myLanguageAlias: language
     tags @include(if: $withTags) {
-      brand
       id
-      label
-      lang
-      vocabulary {
-        _ObjectId_
-        _ObjectType_
-        brand
+      language
+      tagLabel: label
+      taxonomy {
         id
         label
-        myLangAlias: lang
+        language
       }
     }
     title
