@@ -302,7 +302,7 @@ trait QueryTrait
      */
     public function addFragment(Fragment $fragment)
     {
-        $this->fragments[] = $fragment;
+        $this->fragments[$fragment->name] = $fragment;
 
         return $this;
     }
