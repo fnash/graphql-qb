@@ -199,6 +199,20 @@ trait QueryTrait
     }
 
     /**
+     * @param array $fields
+     *
+     * @return self
+     */
+    public function removeFields(array $fields = []): Query
+    {
+        foreach ($fields as $field) {
+            unset($this->fields[$field]);
+        }
+
+        return $this;
+    }
+
+    /**
      * @param array $value
      * @param array $skipIf
      * @param array $includeIf
