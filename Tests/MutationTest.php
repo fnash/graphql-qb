@@ -1,15 +1,16 @@
 <?php
 
-namespace Tests\Fnash\GraphQL;
+namespace Tests\Commadore\GraphQL;
 
-use Fnash\GraphQL\Mutation;
+use Commadore\GraphQL\Mutation;
 use PHPUnit\Framework\TestCase;
 
 class MutationTest extends TestCase
 {
     public function testMutation()
     {
-        $mutation = Mutation::create('createReview')
+        $mutation = new Mutation('createReview');
+        $mutation
             ->operationName('CreateReviewForEpisode')
             ->variables([
                 '$ep' => 'Episode!',

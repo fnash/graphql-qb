@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\Fnash\GraphQL;
+namespace Tests\Commadore\GraphQL;
 
-use Fnash\GraphQL\Fragment;
-use Fnash\GraphQL\Query;
+use Commadore\GraphQL\Fragment;
+use Commadore\GraphQL\Query;
 use PHPUnit\Framework\TestCase;
 
 class FragmentTest extends TestCase
@@ -13,10 +13,10 @@ class FragmentTest extends TestCase
      */
     public function testAddFields()
     {
-        $fragment1 = Fragment::create('articleFragment', 'article', [
+        $fragment1 = new Fragment('articleFragment', 'article', [
            'id',
            'title',
-           'image' => Query::create()->fields([
+           'image' => (new Query())->fields([
                 'width',
                 'height',
                 'filename',
@@ -24,10 +24,10 @@ class FragmentTest extends TestCase
            ]),
         ]);
 
-        $fragment2 = Fragment::create('articleFragment', 'article')->fields([
+        $fragment2 = new Fragment('articleFragment', 'article', [
            'id',
            'title',
-           'image' => Query::create()->fields([
+           'image' => (new Query())->fields([
                 'width',
                 'height',
                 'filename',
@@ -56,13 +56,13 @@ class FragmentTest extends TestCase
      */
     public function testSortFields()
     {
-        $fragment1 = Fragment::create('articleFragment', 'article', [
+        $fragment1 = new Fragment('articleFragment', 'article', [
             'id',
             'title',
             'image',
         ]);
 
-        $fragment2 = Fragment::create('articleFragment', 'article')->fields([
+        $fragment2 = (new Fragment('articleFragment', 'article'))->fields([
             'title',
             'image',
             'id',

@@ -23,7 +23,7 @@ TODO:
 
 include_once 'vendor/autoload.php';
 
-use Fnash\GraphQL\Query;
+use Commadore\GraphQL\Query;
 
 $query = Query::create('article')
     ->variables([

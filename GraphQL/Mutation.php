@@ -1,11 +1,19 @@
 <?php
 
-namespace Fnash\GraphQL;
+namespace Commadore\GraphQL;
 
-final class Mutation
+final class Mutation extends AbstractQuery
 {
-    use QueryTrait;
-
     const KEYWORD = 'mutation';
     const GENERATED_NAME_PREFIX = 'mutation_';
+
+    public function getKeyword(): string
+    {
+        return self::KEYWORD;
+    }
+
+    public function getPrefix(): string
+    {
+        return self::GENERATED_NAME_PREFIX;
+    }
 }
