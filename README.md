@@ -1,4 +1,4 @@
-##Refactored version of https://github.com/fnash/graphql-qb.
+## Refactored version of https://github.com/fnash/graphql-qb.
 I have a use case where I need to mock this lib, so statics and traits aren't desirable
 
 # graphql-qb
