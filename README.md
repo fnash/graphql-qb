@@ -25,7 +25,8 @@ include_once 'vendor/autoload.php';
 
 use Commadore\GraphQL\Query;
 
-$query = Query::create('article')
+$query = new Query('article');
+$query
     ->variables([
         '$withTags' => 'Boolean = false',
     ])
@@ -34,11 +35,11 @@ $query = Query::create('article')
         'title',
         'body',
         'myLanguageAlias' => 'language',
-        'tags' => Query::create()->fields([
+        'tags' => (new Query)->fields([
             'id',
             'tagLabel' => 'label',
             'language',
-            'taxonomy' => Query::create()->fields([
+            'taxonomy' => (new Query)->fields([
                 'id',
                 'label',
                 'language'
