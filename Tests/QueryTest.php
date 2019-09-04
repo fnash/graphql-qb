@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\Fnash\GraphQL;
+namespace Tests\Commadore\GraphQL;
 
-use Fnash\GraphQL\Fragment;
-use Fnash\GraphQL\Query;
+use Commadore\GraphQL\Fragment;
+use Commadore\GraphQL\Query;
 use PHPUnit\Framework\TestCase;
 
 class QueryTest extends TestCase
@@ -13,7 +13,7 @@ class QueryTest extends TestCase
      */
     public function testAddFields()
     {
-        $query1 = Query::create('article', [
+        $query1 = new Query('article', [
             'id' => 999,
             'title' => 'Hello World',
             'note' => 3.5,
@@ -23,7 +23,7 @@ class QueryTest extends TestCase
             'body',
         ]);
 
-        $query2 = Query::create('article')
+        $query2 = (new Query('article'))
             ->arguments([
                 'id' => 999,
                 'title' => 'Hello World',
@@ -53,7 +53,7 @@ class QueryTest extends TestCase
      */
     public function testSortFields()
     {
-        $query1 = Query::create('article')
+        $query1 = (new Query('article'))
             ->arguments([
                 'title' => 'Hello World',
                 'note' => 3.5,
@@ -65,7 +65,7 @@ class QueryTest extends TestCase
                 'body',
             ]);
 
-        $query2 = Query::create('article')
+        $query2 = (new Query('article'))
             ->arguments([
                 'id' => 999,
                 'title' => 'Hello World',
@@ -85,8 +85,7 @@ class QueryTest extends TestCase
      */
     public function testAlias()
     {
-        $query = Query::create('article')
-            ->fields([
+        $query = (new Query('article'))->fields([
                 'articleId' => 'id',
                 'articleTitle' => 'title',
                 'body',
@@ -110,7 +109,7 @@ class QueryTest extends TestCase
     public function testOperationName()
     {
         // query with variables but no operation name
-        $query1 = Query::create('article')
+        $query1 = (new Query('article'))
             ->variables([
                 '$id' => 'Integer',
             ])
@@ -135,7 +134,7 @@ class QueryTest extends TestCase
         $this->assertEquals($expected1, (string) $query1);
 
         // query with variables and operation name
-        $query2 = Query::create('article')
+        $query2 = (new Query('article'))
             ->operationName('articlesQuery')
             ->variables([
                 '$id' => 'Integer',
@@ -161,7 +160,7 @@ class QueryTest extends TestCase
         $this->assertEquals($expected2, (string) $query2);
 
         // query with only operation name
-        $query3 = Query::create('article')
+        $query3 = (new Query('article'))
             ->operationName('articlesQuery')
             ->fields([
                 'id',
@@ -187,7 +186,7 @@ class QueryTest extends TestCase
     public function testDirective()
     {
         // skip if directive
-        $query1 = Query::create('article')
+        $query1 = (new Query('article'))
             ->operationName('articlesQuery')
             ->variables([
                 '$withoutTags' => 'Boolean',
@@ -216,7 +215,7 @@ class QueryTest extends TestCase
         $this->assertEquals($expected1, (string) $query1);
 
         // include if directive
-        $query2 = Query::create('article')
+        $query2 = (new Query('article'))
             ->operationName('articlesQuery')
             ->variables([
                 '$withTags' => 'Boolean!',
@@ -250,7 +249,7 @@ class QueryTest extends TestCase
      */
     public function testSubqueryWithAlias()
     {
-        $query = Query::create('article')
+        $query = (new Query('article'))
             ->operationName('articlesQuery')
             ->variables([
                 '$withTags' => 'Boolean!',
@@ -260,7 +259,7 @@ class QueryTest extends TestCase
                 'title',
                 'body',
                 // sub query with type and alias
-                'articleTags' => Query::create('tags')->fields([
+                'articleTags' => (new Query('tags'))->fields([
                     'id',
                     'tagTitle' => 'title',
                 ]),
@@ -288,7 +287,7 @@ class QueryTest extends TestCase
 
     public function testSubqueryWithoutAlias()
     {
-        $query = Query::create('article')
+        $query = (new Query('article'))
             ->operationName('articlesQuery')
             ->variables([
                 '$withTags' => 'Boolean!',
@@ -298,7 +297,7 @@ class QueryTest extends TestCase
                 'title',
                 'body',
                 // sub query without type parameter, so we take the alias
-                'tags' => Query::create()->fields([
+                'tags' => (new Query())->fields([
                     'id',
                     'tagTitle' => 'title',
                 ]),
@@ -326,7 +325,7 @@ class QueryTest extends TestCase
 
     public function testQueryWithFragment()
     {
-        $query = Query::create('article')
+        $query = (new Query('article'))
             ->operationName('articlesQuery')
             ->fields([
                 'id',
@@ -334,12 +333,12 @@ class QueryTest extends TestCase
                 'body',
                 '...imageFragment',
             ])
-            ->addFragment(Fragment::create('imageFragment', 'image', [
+            ->addFragment(new Fragment('imageFragment', 'image', [
                 'height',
                 'width',
                 'filename',
                 'size',
-                'formats' => Query::create()->fields([
+                'formats' => (new Query())->fields([
                     'id',
                     'name',
                     'url',

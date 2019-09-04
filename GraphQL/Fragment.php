@@ -1,6 +1,6 @@
 <?php
 
-namespace Fnash\GraphQL;
+namespace Commadore\GraphQL;
 
 final class Fragment
 {
@@ -23,12 +23,14 @@ final class Fragment
      * @param string $name
      * @param string $type
      * @param array $fields
-     *
-     * @return Fragment
      */
-    public static function create(string $name, string $type, array $fields = []): Fragment
+    public function __construct(string $name, string $type, array $fields = [])
     {
-        return new self($name, $type, $fields);
+        $this->name = $name;
+
+        $this->type = $type;
+
+        $this->fields($fields);
     }
 
     /**
@@ -98,17 +100,4 @@ final class Fragment
         return implode(', ', $fields);
     }
 
-    /**
-     * @param string $name
-     * @param string $type
-     * @param array $fields
-     */
-    private function __construct(string $name, string $type, array $fields)
-    {
-        $this->name = $name;
-
-        $this->type = $type;
-
-        $this->fields($fields);
-    }
 }

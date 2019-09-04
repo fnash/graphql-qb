@@ -1,10 +1,15 @@
 <?php
 
-namespace Fnash\GraphQL;
+namespace Commadore\GraphQL;
 
-trait QueryTrait
+use Commadore\GraphQL\Interfaces\QueryInterface;
+
+abstract class AbstractQuery implements QueryInterface
 {
-    private static $operationNamePlaceholder = '_operationNamePlaceholder_';
+    public static $operationNamePlaceholder = '_operationNamePlaceholder_';
+
+    abstract function getKeyword(): string;
+    abstract function getPrefix(): string;
 
     /**
      * @var string
@@ -55,20 +60,22 @@ trait QueryTrait
      * @param null $type
      * @param array $args
      * @param array $fields
-     *
-     * @return self
      */
-    public static function create($type = null, array $args = [], array $fields = [])
+    public function __construct($type = null, array $args = [], array $fields = [])
     {
-        return new self($type, $args, $fields);
+        $this->type = $type;
+
+        $this->arguments($args);
+
+        $this->fields($fields);
     }
 
     /**
      * @param string $operationName
      *
-     * @return self
+     * @return QueryInterface
      */
-    public function operationName(string $operationName)
+    public function operationName(string $operationName): QueryInterface
     {
         $this->operationName = $operationName;
 
@@ -81,7 +88,7 @@ trait QueryTrait
      *
      * @return string
      */
-    private static function printQuery($operationName, $variables): string
+    private function printQuery($operationName, $variables): string
     {
         if (null === $operationName) {
             if (\count($variables)) {
@@ -91,7 +98,7 @@ trait QueryTrait
             }
         }
 
-        return sprintf('%s %s %s', static::KEYWORD, $operationName, static::printVariables($variables));
+        return sprintf('%s %s %s', $this->getKeyword(), $operationName, $this->printVariables($variables));
     }
 
     /**
@@ -99,7 +106,7 @@ trait QueryTrait
      *
      * @return self
      */
-    public function variables(array $variables = [])
+    public function variables(array $variables = []): QueryInterface
     {
         foreach ($variables as $variableName => $variableType) {
             $this->variables[(string) $variableName] = (string) $variableType;
@@ -113,7 +120,7 @@ trait QueryTrait
      *
      * @return string
      */
-    private static function printVariables(array $value): string
+    private function printVariables(array $value): string
     {
         if (!\count($value)) {
             return '';
@@ -133,7 +140,7 @@ trait QueryTrait
      *
      * @return self
      */
-    public function arguments(array $args = [])
+    public function arguments(array $args = []): QueryInterface
     {
         foreach ($args as $name => $value) {
             $this->args[$name] = $value;
@@ -144,12 +151,13 @@ trait QueryTrait
         return $this;
     }
 
+
     /**
      * @param array $value
      *
      * @return string
      */
-    private static function printArgs(array $value): string
+    private function printArgs(array $value): string
     {
         if (!count($value)) {
             return '';
@@ -176,7 +184,7 @@ trait QueryTrait
      *
      * @return self
      */
-    public function fields(array $fields = [])
+    public function fields(array $fields = []): QueryInterface
     {
         foreach ($fields as $fieldAlias => $field) {
             if (\is_string($field)) {
@@ -203,7 +211,7 @@ trait QueryTrait
      *
      * @return self
      */
-    public function removeFields(array $fields = []): Query
+    public function removeFields(array $fields = []): QueryInterface
     {
         foreach ($fields as $field) {
             unset($this->fields[$field]);
@@ -219,7 +227,7 @@ trait QueryTrait
      *
      * @return string
      */
-    private static function printFields(array $value, array $skipIf = [], array $includeIf = []): string
+    private function printFields(array $value, array $skipIf = [], array $includeIf = []): string
     {
         $fields = [];
 
@@ -271,7 +279,7 @@ trait QueryTrait
      *
      * @return self
      */
-    public function skipIf(array $values = [])
+    public function skipIf(array $values = []): QueryInterface
     {
         foreach ($values as $field => $argument) {
             $this->skipIf[$field] = $argument;
@@ -285,7 +293,7 @@ trait QueryTrait
      *
      * @return self
      */
-    public function includeIf(array $values = [])
+    public function includeIf(array $values = []): QueryInterface
     {
         foreach ($values as $field => $argument) {
             $this->includeIf[$field] = $argument;
@@ -297,14 +305,20 @@ trait QueryTrait
     public function __toString()
     {
         if ($this->isRootQuery) {
-            $query = sprintf('%s { %s %s { %s } } %s', static::printQuery($this->operationName, $this->variables), static::printType($this->type), static::printArgs($this->args), static::printFields($this->fields, $this->skipIf, $this->includeIf), static::printFragments($this->fragments));
+            $query = sprintf('%s { %s %s { %s } } %s',
+                $this->printQuery($this->operationName, $this->variables),
+                $this->printType($this->type), $this->printArgs($this->args),
+                $this->printFields($this->fields, $this->skipIf, $this->includeIf),
+                $this->printFragments($this->fragments));
         } else {
-            $query = sprintf('%s { %s }', static::printType($this->type), static::printFields($this->fields, $this->skipIf, $this->includeIf));
+            $query = sprintf('%s { %s }',
+                $this->printType($this->type),
+                $this->printFields($this->fields, $this->skipIf, $this->includeIf));
         }
 
         $query = \GraphQL\Language\Printer::doPrint(\GraphQL\Language\Parser::parse((string) $query));
 
-        $query = str_replace(static::$operationNamePlaceholder, static::GENERATED_NAME_PREFIX.sha1($query), $query);
+        $query = str_replace(static::$operationNamePlaceholder, $this->getPrefix().sha1($query), $query);
 
         return $query;
     }
@@ -314,7 +328,7 @@ trait QueryTrait
      *
      * @return $this
      */
-    public function addFragment(Fragment $fragment)
+    public function addFragment(Fragment $fragment): QueryInterface
     {
         $this->fragments[$fragment->name] = $fragment;
 
@@ -336,21 +350,8 @@ trait QueryTrait
         return $fragments;
     }
 
-    /**
-     * @param null $type
-     * @param array $args
-     * @param array $fields
-     */
-    private function __construct($type = null, array $args = [], array $fields = [])
-    {
-        $this->type = $type;
 
-        $this->arguments($args);
-
-        $this->fields($fields);
-    }
-
-    private static function printType($value): string
+    private function printType($value): string
     {
         if (\is_string($value)) {
             return $value;
