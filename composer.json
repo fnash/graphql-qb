@@ -2,11 +2,6 @@
     "name": "commadore/graphql-qb",
     "type": "library",
     "description": "A php GraphQL Query Builder. Nice API. Readable queries.",
-    "autoload": {
-        "psr-4": {
-            "Commadore\\GraphQL\\": "GraphQL/"
-        }
-    },
     "license": "MIT",
     "authors": [
         {
@@ -17,11 +12,17 @@
             "name": "commadore"
         }
     ],
+    "autoload": {
+        "psr-4": {
+            "Commadore\\GraphQL\\": "src/"
+        }
+    },
+
     "require": {
         "php": "^7.2",
         "webonyx/graphql-php": "^0.11|^0.12|^0.13"
     },
     "require-dev": {
-        "phpunit/phpunit": "^6.4"
+        "phpunit/phpunit": "^8"
     }
 }

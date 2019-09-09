@@ -36,7 +36,7 @@ class QueryTest extends TestCase
             ]);
 
         $expected =
-'{
+            '{
   article(id: 999, note: 3.5, title: "Hello World") {
     body
     id
@@ -86,13 +86,13 @@ class QueryTest extends TestCase
     public function testAlias()
     {
         $query = (new Query('article'))->fields([
-                'articleId' => 'id',
-                'articleTitle' => 'title',
-                'body',
-            ]);
+            'articleId' => 'id',
+            'articleTitle' => 'title',
+            'body',
+        ]);
 
         $expected =
-'{
+            '{
   article {
     articleId: id
     articleTitle: title
@@ -123,7 +123,7 @@ class QueryTest extends TestCase
             ]);
 
         $expected1 =
-'query query_a6fa4442880a206cf86fc5c24e0a384637ab885d($id: Integer) {
+            'query query_a6fa4442880a206cf86fc5c24e0a384637ab885d($id: Integer) {
   article(id: $id) {
     body
     id
@@ -149,7 +149,7 @@ class QueryTest extends TestCase
             ]);
 
         $expected2 =
-'query articlesQuery($id: Integer) {
+            'query articlesQuery($id: Integer) {
   article(id: $id) {
     body
     id
@@ -169,7 +169,7 @@ class QueryTest extends TestCase
             ]);
 
         $expected3 =
-'query articlesQuery {
+            'query articlesQuery {
   article {
     body
     id
@@ -203,7 +203,7 @@ class QueryTest extends TestCase
         ;
 
         $expected1 =
-'query articlesQuery($withoutTags: Boolean) {
+            'query articlesQuery($withoutTags: Boolean) {
   article {
     body
     id
@@ -232,7 +232,7 @@ class QueryTest extends TestCase
         ;
 
         $expected2 =
-'query articlesQuery($withTags: Boolean!) {
+            'query articlesQuery($withTags: Boolean!) {
   article {
     body
     id
@@ -270,7 +270,7 @@ class QueryTest extends TestCase
         ;
 
         $expected =
-'query articlesQuery($withTags: Boolean!) {
+            'query articlesQuery($withTags: Boolean!) {
   article {
     articleTags: tags @include(if: $withTags) {
       id
@@ -308,7 +308,7 @@ class QueryTest extends TestCase
         ;
 
         $expected =
-'query articlesQuery($withTags: Boolean!) {
+            'query articlesQuery($withTags: Boolean!) {
   article {
     body
     id

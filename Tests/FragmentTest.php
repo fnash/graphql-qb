@@ -14,25 +14,25 @@ class FragmentTest extends TestCase
     public function testAddFields()
     {
         $fragment1 = new Fragment('articleFragment', 'article', [
-           'id',
-           'title',
-           'image' => (new Query())->fields([
+            'id',
+            'title',
+            'image' => (new Query())->fields([
                 'width',
                 'height',
                 'filename',
                 'size',
-           ]),
+            ]),
         ]);
 
         $fragment2 = new Fragment('articleFragment', 'article', [
-           'id',
-           'title',
-           'image' => (new Query())->fields([
+            'id',
+            'title',
+            'image' => (new Query())->fields([
                 'width',
                 'height',
                 'filename',
                 'size',
-           ]),
+            ]),
         ]);
 
         $expected =

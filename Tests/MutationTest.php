@@ -26,7 +26,7 @@ class MutationTest extends TestCase
             ]);
 
         $expected =
-'mutation CreateReviewForEpisode($ep: Episode!, $review: ReviewInput!) {
+            'mutation CreateReviewForEpisode($ep: Episode!, $review: ReviewInput!) {
   createReview(episode: $ep, review: $review) {
     commentary
     stars
