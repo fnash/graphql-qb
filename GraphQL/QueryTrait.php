@@ -87,7 +87,7 @@ trait QueryTrait
             if (\count($variables)) {
                 $operationName = static::$operationNamePlaceholder;
             } else {
-                return '';
+                return static::class === Mutation::class ? sprintf('%s', static::KEYWORD) : '';
             }
         }
 
@@ -158,7 +158,9 @@ trait QueryTrait
         $args = [];
         foreach ($value as $argName => $argValue) {
             if (\is_string($argValue) && '$' !== $argValue[0]) {
-                $argValue = sprintf('"%s"', $argValue);
+                if (preg_match_all('/"""/', $argValue) !== 2) { // if not a multi line argument value
+                    $argValue = sprintf('"%s"', $argValue);
+                }
             }
 
             if (\is_bool($argValue) || \is_float($argValue)) {
@@ -187,7 +189,7 @@ trait QueryTrait
                 }
             }
 
-            if ($field instanceof self) {
+            if ($field instanceof Query) {
                 $field->isRootQuery = false;
                 $this->fields[$fieldAlias] = $field;
             }
@@ -246,7 +248,7 @@ trait QueryTrait
                 }
             }
 
-            if ($field instanceof self) {
+            if ($field instanceof Query) {
                 $field->isRootQuery = false;
 
                 if (array_key_exists($fieldAlias, $skipIf)) {
